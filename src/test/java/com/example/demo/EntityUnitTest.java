@@ -2,49 +2,70 @@ package com.example.demo;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-
-import org.junit.jupiter.api.BeforeAll;
+import com.example.demo.entities.*;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestInstance;
-import org.junit.jupiter.api.TestInstance.Lifecycle;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
-import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.beans.factory.annotation.Autowired;
 
-import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
-import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase.Replace;
-
-import com.example.demo.entities.*;
+import java.time.LocalDateTime;
 
 @DataJpaTest
-@AutoConfigureTestDatabase(replace=Replace.NONE)
-@TestInstance(Lifecycle.PER_CLASS)
-class EntityUnitTest {
+public class EntityUnitTest {
 
-	@Autowired
-	private TestEntityManager entityManager;
-
-	private Doctor d1;
-
-	private Patient p1;
-
-    private Room r1;
-
-    private Appointment a1;
-    private Appointment a2;
-    private Appointment a3;
+    @Autowired
+    private TestEntityManager entityManager;
 
     @Test
-    void this_is_a_test(){
-        // DELETE THIS TEST
-        assertThat(false).isEqualTo(true);
+    public void testDoctorEntity() {
+        Doctor doctor = new Doctor("John", "Doe", 35, "john.doe@example.com");
+        entityManager.persist(doctor);
+        entityManager.flush();
+
+        Doctor found = entityManager.find(Doctor.class, doctor.getId());
+
+        assertThat(found).isEqualTo(doctor);
     }
 
-    /** TODO
-     * Implement tests for each Entity class: Doctor, Patient, Room and Appointment.
-     * Make sure you are as exhaustive as possible. Coverage is checked ;)
-     */
+    @Test
+    public void testPatientEntity() {
+        Patient patient = new Patient("Jane", "Smith", 28, "jane.smith@example.com");
+        entityManager.persist(patient);
+        entityManager.flush();
+
+        Patient found = entityManager.find(Patient.class, patient.getId());
+
+        assertThat(found).isEqualTo(patient);
+    }
+
+    @Test
+    public void testRoomEntity() {
+        Room room = new Room("Exam Room 1");
+        entityManager.persist(room);
+        entityManager.flush();
+
+        Room found = entityManager.find(Room.class, room.getRoomName());
+
+        assertThat(found).isEqualTo(room);
+    }
+
+    @Test
+    public void testAppointmentEntity() {
+        Doctor doctor = new Doctor("John", "Doe", 35, "john.doe@example.com");
+        entityManager.persist(doctor);
+
+        Patient patient = new Patient("Jane", "Smith", 28, "jane.smith@example.com");
+        entityManager.persist(patient);
+
+        Room room = new Room("Exam Room 1");
+        entityManager.persist(room);
+
+        Appointment appointment = new Appointment(patient, doctor, room, LocalDateTime.now(), LocalDateTime.now().plusHours(3));
+        entityManager.persist(appointment);
+        entityManager.flush();
+
+        Appointment found = entityManager.find(Appointment.class, appointment.getId());
+
+        assertThat(found).isEqualTo(appointment);
+    }
 }

@@ -1,6 +1,8 @@
 
 package com.example.demo;
 
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.hasSize;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
@@ -40,62 +42,284 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  * Make sure to be as exhaustive as possible. Coverage is checked ;)
  */
 
+import static org.mockito.Mockito.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+
 @WebMvcTest(DoctorController.class)
-class DoctorControllerUnitTest{
+class DoctorControllerUnitTest {
+
+    @Autowired
+    private MockMvc mockMvc;
+
+    @Autowired
+    private ObjectMapper objectMapper;
 
     @MockBean
     private DoctorRepository doctorRepository;
 
-    @Autowired 
-    private MockMvc mockMvc;
+    @Test
+    void getAllDoctors_ReturnsListOfDoctors() throws Exception {
+        // Arrange
+        List<Doctor> doctors = Arrays.asList(
+                new Doctor("John", "Doe", 35, "john.doe@example.com"),
+                new Doctor("Jane", "Smith", 40, "jane.smith@example.com")
+        );
+        when(doctorRepository.findAll()).thenReturn(doctors);
 
-    @Autowired
-    private ObjectMapper objectMapper;
+        // Act and Assert
+        mockMvc.perform(get("/api/doctors"))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$", hasSize(2)))
+                .andExpect(jsonPath("$[0].firstName").value("John"))
+                .andExpect(jsonPath("$[1].firstName").value("Jane"));
+    }
 
     @Test
-    void this_is_a_test(){
-        // DELETE ME
-        assertThat(true).isEqualTo(false);
+    void getAllDoctors_ReturnsNoContent() throws Exception {
+        // Arrange
+        when(doctorRepository.findAll()).thenReturn(Collections.emptyList());
+
+        // Act and Assert
+        mockMvc.perform(get("/api/doctors"))
+                .andExpect(status().isNoContent());
+    }
+
+    @Test
+    void getDoctorById_ReturnsDoctor() throws Exception {
+        // Arrange
+        long doctorId = 1L;
+        Doctor doctor = new Doctor("John", "Doe", 35, "john.doe@example.com");
+        when(doctorRepository.findById(doctorId)).thenReturn(Optional.of(doctor));
+
+        // Act and Assert
+        mockMvc.perform(get("/api/doctors/{id}", doctorId))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.firstName").value("John"))
+                .andExpect(jsonPath("$.lastName").value("Doe"));
+    }
+
+    @Test
+    void getDoctorById_DoctorNotFound_ReturnsNotFound() throws Exception {
+        // Arrange
+        long doctorId = 1L;
+        when(doctorRepository.findById(doctorId)).thenReturn(Optional.empty());
+
+        // Act and Assert
+        mockMvc.perform(get("/api/doctors/{id}", doctorId))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void createDoctor_CreatesDoctor() throws Exception {
+        // Arrange
+        Doctor doctor = new Doctor("John", "Doe", 35, "john.doe@example.com");
+        when(doctorRepository.save(any(Doctor.class))).thenReturn(doctor);
+
+        // Act and Assert
+        mockMvc.perform(post("/api/doctor")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(doctor)))
+                .andExpect(status().isCreated());
+    }
+
+    @Test
+    void deleteDoctor_DeletesDoctor() throws Exception {
+        // Arrange
+        long doctorId = 1L;
+        when(doctorRepository.findById(doctorId)).thenReturn(Optional.of(new Doctor("John", "Doe", 35, "john.doe@example.com")));
+
+        // Act and Assert
+        mockMvc.perform(delete("/api/doctors/{id}", doctorId))
+                .andExpect(status().isOk());
+        verify(doctorRepository, times(1)).deleteById(doctorId);
     }
 }
 
 
+
 @WebMvcTest(PatientController.class)
-class PatientControllerUnitTest{
+class PatientControllerUnitTest {
+
+    @Autowired
+    private MockMvc mockMvc;
+
+    @Autowired
+    private ObjectMapper objectMapper;
 
     @MockBean
     private PatientRepository patientRepository;
 
-    @Autowired 
+    @Test
+    void getAllPatients_ReturnsListOfPatients() throws Exception {
+        // Arrange
+        List<Patient> patients = Arrays.asList(
+                new Patient("Alice", "Smith", 28, "alice@example.com"),
+                new Patient("Bob", "Johnson", 35, "bob@example.com")
+        );
+        when(patientRepository.findAll()).thenReturn(patients);
+
+        // Act and Assert
+        mockMvc.perform(get("/api/patients"))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$", hasSize(2)))
+                .andExpect(jsonPath("$[0].firstName").value("Alice"))
+                .andExpect(jsonPath("$[1].firstName").value("Bob"));
+    }
+
+    @Test
+    void getAllPatients_ReturnsNoContent() throws Exception {
+        // Arrange
+        when(patientRepository.findAll()).thenReturn(Collections.emptyList());
+
+        // Act and Assert
+        mockMvc.perform(get("/api/patients"))
+                .andExpect(status().isNoContent());
+    }
+
+    @Test
+    void getPatientById_ReturnsPatient() throws Exception {
+        // Arrange
+        long patientId = 1L;
+        Patient patient = new Patient("Alice", "Smith", 28, "alice@example.com");
+        when(patientRepository.findById(patientId)).thenReturn(Optional.of(patient));
+
+        // Act and Assert
+        mockMvc.perform(get("/api/patients/{id}", patientId))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.firstName").value("Alice"))
+                .andExpect(jsonPath("$.lastName").value("Smith"));
+    }
+
+    @Test
+    void getPatientById_PatientNotFound_ReturnsNotFound() throws Exception {
+        // Arrange
+        long patientId = 1L;
+        when(patientRepository.findById(patientId)).thenReturn(Optional.empty());
+
+        // Act and Assert
+        mockMvc.perform(get("/api/patients/{id}", patientId))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void createPatient_CreatesPatient() throws Exception {
+        // Arrange
+        Patient patient = new Patient("Alice", "Smith", 28, "alice@example.com");
+        when(patientRepository.save(any(Patient.class))).thenReturn(patient);
+
+        // Act and Assert
+        mockMvc.perform(post("/api/patient")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(patient)))
+                .andExpect(status().isCreated());
+    }
+
+    @Test
+    void deletePatient_DeletesPatient() throws Exception {
+        // Arrange
+        long patientId = 1L;
+        when(patientRepository.findById(patientId)).thenReturn(Optional.of(new Patient("Alice", "Smith", 28, "alice@example.com")));
+
+        // Act and Assert
+        mockMvc.perform(delete("/api/patients/{id}", patientId))
+                .andExpect(status().isOk());
+        verify(patientRepository, times(1)).deleteById(patientId);
+    }
+}
+
+@WebMvcTest(RoomController.class)
+class RoomControllerUnitTest {
+
+    @Autowired
     private MockMvc mockMvc;
 
     @Autowired
     private ObjectMapper objectMapper;
-
-    @Test
-    void this_is_a_test(){
-        // DELETE ME
-        assertThat(true).isEqualTo(false);
-    }
-
-}
-
-@WebMvcTest(RoomController.class)
-class RoomControllerUnitTest{
 
     @MockBean
     private RoomRepository roomRepository;
 
-    @Autowired 
-    private MockMvc mockMvc;
-
-    @Autowired
-    private ObjectMapper objectMapper;
-
     @Test
-    void this_is_a_test(){
-        // DELETE ME
-        assertThat(true).isEqualTo(false);
+    void getAllRooms_ReturnsListOfRooms() throws Exception {
+        // Arrange
+        List<Room> rooms = Arrays.asList(
+                new Room("RoomA"),
+                new Room("RoomB")
+        );
+        when(roomRepository.findAll()).thenReturn(rooms);
+
+        // Act and Assert
+        mockMvc.perform(get("/api/rooms"))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$", hasSize(2)))
+                .andExpect(jsonPath("$[0].roomName").value("RoomA"))
+                .andExpect(jsonPath("$[1].roomName").value("RoomB"));
     }
 
+    @Test
+    void getAllRooms_ReturnsNoContent() throws Exception {
+        // Arrange
+        when(roomRepository.findAll()).thenReturn(Collections.emptyList());
+
+        // Act and Assert
+        mockMvc.perform(get("/api/rooms"))
+                .andExpect(status().isNoContent());
+    }
+
+    @Test
+    void getRoomByRoomName_ReturnsRoom() throws Exception {
+        // Arrange
+        String roomName = "RoomA";
+        Room room = new Room(roomName);
+        when(roomRepository.findByRoomName(roomName)).thenReturn(Optional.of(room));
+
+        // Act and Assert
+        mockMvc.perform(get("/api/rooms/{roomName}", roomName))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.roomName").value(roomName));
+    }
+
+    @Test
+    void getRoomByRoomName_RoomNotFound_ReturnsNotFound() throws Exception {
+        // Arrange
+        String roomName = "NonExistentRoom";
+        when(roomRepository.findByRoomName(roomName)).thenReturn(Optional.empty());
+
+        // Act and Assert
+        mockMvc.perform(get("/api/rooms/{roomName}", roomName))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void createRoom_CreatesRoom() throws Exception {
+        // Arrange
+        Room room = new Room("RoomX");
+        when(roomRepository.save(any(Room.class))).thenReturn(room);
+
+        // Act and Assert
+        mockMvc.perform(post("/api/room")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(room)))
+                .andExpect(status().isCreated());
+    }
+
+    @Test
+    void deleteRoom_DeletesRoom() throws Exception {
+        // Arrange
+        String roomName = "RoomY";
+        when(roomRepository.findByRoomName(roomName)).thenReturn(Optional.of(new Room(roomName)));
+
+        // Act and Assert
+        mockMvc.perform(delete("/api/rooms/{roomName}", roomName))
+                .andExpect(status().isOk());
+        verify(roomRepository, times(1)).deleteByRoomName(roomName);
+    }
 }
+
