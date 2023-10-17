@@ -1,0 +1,32 @@
+# Stage 1: Building the Maven microservice (using Maven)
+FROM maven:latest as builder
+
+# Copy the source code of your microservice to the build stage
+COPY src /app/src
+COPY pom.xml /app/pom.xml
+
+# Compile and run tests
+WORKDIR /app
+RUN mvn clean test
+
+# Build the microservice if tests passed
+RUN mvn package
+
+# Stage 2: Building the final microservice image (using an OpenJDK image)
+FROM openjdk:8
+
+# Copy the JAR file of the microservice from the build stage
+# Copy the JAR file of the microservice from the build stage
+COPY --from=builder /app/target/accenture-techhub-0.0.1-SNAPSHOT.war /app/accenture-techhub.war
+
+
+# Expose the necessary port
+EXPOSE 8080
+
+ENV SPRING_DATASOURCE_USERNAME=root
+ENV SPRING_DATASOURCE_PASSWORD=root
+ENV SPRING_DATASOURCE_URL=jdbc:mysql://mysql-container:3306/accwe-hospital
+
+
+# Wait to mysql and start the microservice
+CMD ["java", "-jar", "sleep 5 & /app/accenture-techhub.war"]
