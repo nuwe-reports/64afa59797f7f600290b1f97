@@ -1,0 +1,30 @@
+version: '3'
+services:
+  mysql:
+    container_name: mysql-container
+    build:
+      context: .
+      dockerfile: dockerfile.mysql
+    environment:
+      MYSQL_DATABASE: accwe-hospital
+      MYSQL_ROOT_PASSWORD: root
+    ports:
+      - "3306:3306"
+    networks:
+      - accenture-nuwe-net
+
+  spring:
+    container_name: spring-container
+    build:
+      context: .
+      dockerfile: dockerfile.maven
+    ports:
+      - "8080:8080"
+    depends_on:
+      - mysql
+    networks:
+      - accenture-nuwe-net
+
+networks:
+  accenture-nuwe-net:
+    driver: bridge

@@ -3,6 +3,7 @@ package com.example.demo.controllers;
 import com.example.demo.repositories.*;
 import com.example.demo.entities.*;
 
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -17,6 +18,7 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
+
 
 
 @RestController
@@ -52,11 +54,20 @@ public class AppointmentController {
 
     @PostMapping("/appointment")
     public ResponseEntity<List<Appointment>> createAppointment(@RequestBody Appointment appointment){
-        /** TODO 
-         * Implement this function, which acts as the POST /api/appointment endpoint.
-         * Make sure to check out the whole project. Specially the Appointment.java class
-         */
-        return new ResponseEntity<>(HttpStatus.I_AM_A_TEAPOT);
+        if(appointment.getStartsAt().equals(appointment.getFinishesAt())){
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+        List<Appointment> appointments = appointmentRepository.findAll();
+        Optional<Appointment> optionalAppointment = appointments.stream()
+                .filter((dbApointment) -> (dbApointment.overlaps(appointment) && dbApointment.getRoom().getRoomName().equals(appointment.getRoom().getRoomName())))
+                .findAny();
+
+        if(optionalAppointment.isPresent()){
+            return new ResponseEntity<>(HttpStatus.NOT_ACCEPTABLE);
+        }
+        appointmentRepository.save(appointment);
+
+        return ResponseEntity.ok(appointmentRepository.findAll());
     }
 
 
