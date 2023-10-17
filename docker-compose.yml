@@ -4,7 +4,7 @@ services:
     container_name: mysql-container
     build:
       context: .
-      dockerfile: dockerfile.mysql
+      dockerfile: Dockerfile.mysql
     environment:
       MYSQL_DATABASE: accwe-hospital
       MYSQL_ROOT_PASSWORD: root
@@ -17,7 +17,7 @@ services:
     container_name: spring-container
     build:
       context: .
-      dockerfile: dockerfile.maven
+      dockerfile: Dockerfile.maven
     ports:
       - "8080:8080"
     depends_on:
