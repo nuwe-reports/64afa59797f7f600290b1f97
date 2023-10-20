@@ -86,14 +86,20 @@ public class EntityUnitTest {
         LocalDateTime startB = LocalDateTime.of(2023, 10, 20, 10, 30);
         LocalDateTime endB = LocalDateTime.of(2023, 10, 20, 11, 30);
 
+        LocalDateTime startC = LocalDateTime.of(2023, 10, 20, 10, 15);
+        LocalDateTime endC = LocalDateTime.of(2023, 10, 20, 10, 45);
+
         Appointment appointmentA = new Appointment(patientA, doctorA, roomA, startA, endA);
         entityManager.persist(appointmentA);
 
         Appointment appointmentB = new Appointment(patientA, doctorA, roomA, startB, endB);
+        Appointment appointmentC = new Appointment(patientA, doctorA, roomA, startC, endC);
 
         // Verify if the appointments overlap each other
-        boolean isOverlapping = appointmentA.overlaps(appointmentB);
+        boolean isOverlappingAB = appointmentA.overlaps(appointmentB);
+        boolean isOverlappingAC = appointmentA.overlaps(appointmentC);
 
-        assertThat(isOverlapping).isTrue();
+        assertThat(isOverlappingAB).isTrue();
+        assertThat(isOverlappingAC).isTrue();
     }
 }

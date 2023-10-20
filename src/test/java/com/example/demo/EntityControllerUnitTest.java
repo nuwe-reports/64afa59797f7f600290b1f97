@@ -136,6 +136,30 @@ class DoctorControllerUnitTest {
                 .andExpect(status().isOk());
         verify(doctorRepository, times(1)).deleteById(doctorId);
     }
+
+    @Test
+    void deleteAllDoctors_DeletesAllDoctors() throws Exception {
+        // Arrange
+        when(doctorRepository.findAll()).thenReturn(Collections.emptyList());
+
+        // Act and Assert
+        mockMvc.perform(delete("/api/doctors"))
+                .andExpect(status().isOk());
+
+
+        verify(doctorRepository, times(1)).deleteAll();
+    }
+
+    @Test
+    void deleteDoctor_DoctorNotFound_ReturnsNotFound() throws Exception {
+        // Arrange
+        long doctorId = 1L;
+        when(doctorRepository.findById(doctorId)).thenReturn(Optional.empty());
+
+        // Act and Assert
+        mockMvc.perform(delete("/api/doctors/{id}", doctorId))
+                .andExpect(status().isNotFound());
+    }
 }
 
 
@@ -230,6 +254,30 @@ class PatientControllerUnitTest {
                 .andExpect(status().isOk());
         verify(patientRepository, times(1)).deleteById(patientId);
     }
+
+    @Test
+    void deleteAllPatients_DeletesAllPatients() throws Exception {
+        // Arrange
+        when(patientRepository.findAll()).thenReturn(Collections.emptyList());
+
+        // Act and Assert
+        mockMvc.perform(delete("/api/patients"))
+                .andExpect(status().isOk());
+
+
+        verify(patientRepository, times(1)).deleteAll();
+    }
+
+    @Test
+    void deletePatient_PatientNotFound_ReturnsNotFound() throws Exception {
+        // Arrange
+        long patientId = 1L;
+        when(patientRepository.findById(patientId)).thenReturn(Optional.empty());
+
+        // Act and Assert
+        mockMvc.perform(delete("/api/patients/{id}", patientId))
+                .andExpect(status().isNotFound());
+    }
 }
 
 @WebMvcTest(RoomController.class)
@@ -320,6 +368,30 @@ class RoomControllerUnitTest {
         mockMvc.perform(delete("/api/rooms/{roomName}", roomName))
                 .andExpect(status().isOk());
         verify(roomRepository, times(1)).deleteByRoomName(roomName);
+    }
+
+    @Test
+    void deleteAllRooms_DeletesAllRooms() throws Exception {
+        // Arrange
+        when(roomRepository.findAll()).thenReturn(Collections.emptyList());
+
+        // Act and Assert
+        mockMvc.perform(delete("/api/rooms"))
+                .andExpect(status().isOk());
+
+
+        verify(roomRepository, times(1)).deleteAll();
+    }
+
+    @Test
+    void deleteRoom_RoomNotFound_ReturnsNotFound() throws Exception {
+        // Arrange
+        long roomId = 1L;
+        when(roomRepository.findById(roomId)).thenReturn(Optional.empty());
+
+        // Act and Assert
+        mockMvc.perform(delete("/api/rooms/{id}", roomId))
+                .andExpect(status().isNotFound());
     }
 }
 
