@@ -68,4 +68,32 @@ public class EntityUnitTest {
 
         assertThat(found).isEqualTo(appointment);
     }
+
+    @Test
+    void testAppointmentOverlaps() {
+        Doctor doctorA = new Doctor("Doctor A", "Doe", 40, "doctorA@example.com");
+        entityManager.persist(doctorA);
+
+        Patient patientA = new Patient("Patient A", "Smith", 30, "patientA@example.com");
+        entityManager.persist(patientA);
+
+        Room roomA = new Room("Exam Room 1");
+        entityManager.persist(roomA);
+
+        LocalDateTime startA = LocalDateTime.of(2023, 10, 20, 10, 0);
+        LocalDateTime endA = LocalDateTime.of(2023, 10, 20, 11, 0);
+
+        LocalDateTime startB = LocalDateTime.of(2023, 10, 20, 10, 30);
+        LocalDateTime endB = LocalDateTime.of(2023, 10, 20, 11, 30);
+
+        Appointment appointmentA = new Appointment(patientA, doctorA, roomA, startA, endA);
+        entityManager.persist(appointmentA);
+
+        Appointment appointmentB = new Appointment(patientA, doctorA, roomA, startB, endB);
+
+        // Verify if the appointments overlap each other
+        boolean isOverlapping = appointmentA.overlaps(appointmentB);
+
+        assertThat(isOverlapping).isTrue();
+    }
 }
