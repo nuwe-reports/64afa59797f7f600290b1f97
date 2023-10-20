@@ -17,7 +17,7 @@ public class EntityUnitTest {
     private TestEntityManager entityManager;
 
     @Test
-    public void testDoctorEntity() {
+    void testDoctorEntity() {
         Doctor doctor = new Doctor("John", "Doe", 35, "john.doe@example.com");
         entityManager.persist(doctor);
         entityManager.flush();
@@ -28,7 +28,7 @@ public class EntityUnitTest {
     }
 
     @Test
-    public void testPatientEntity() {
+    void testPatientEntity() {
         Patient patient = new Patient("Jane", "Smith", 28, "jane.smith@example.com");
         entityManager.persist(patient);
         entityManager.flush();
@@ -39,7 +39,7 @@ public class EntityUnitTest {
     }
 
     @Test
-    public void testRoomEntity() {
+    void testRoomEntity() {
         Room room = new Room("Exam Room 1");
         entityManager.persist(room);
         entityManager.flush();
@@ -50,7 +50,7 @@ public class EntityUnitTest {
     }
 
     @Test
-    public void testAppointmentEntity() {
+    void testAppointmentEntity() {
         Doctor doctor = new Doctor("John", "Doe", 35, "john.doe@example.com");
         entityManager.persist(doctor);
 
